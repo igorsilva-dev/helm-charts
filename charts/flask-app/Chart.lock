@@ -1,0 +1,6 @@
+dependencies:
+- name: app-generic
+  repository: file://../app-generic
+  version: 0.1.0
+digest: sha256:b75638af7cb78b15e56b58b59d116b548436c9ea60fdb301c31989681e63c68a
+generated: "2025-11-21T08:16:12.944476+01:00"
