@@ -38,6 +38,16 @@ jobs:
         run: |
           yq -i '.version = "${{ inputs.version }}"' charts/${{ inputs.application }}/Chart.yaml
 
+      - name: debug GH_PAT
+        run: |
+          if [ -z "$GH_PAT" ]; then
+            echo "GH_PAT is EMPTY"
+          else
+            echo "GH_PAT length is: ${#GH_PAT}"
+          fi
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+
       - name: Commit and push changes
         env:
           GH_PAT: ${{ secrets.GH_HELM }}
