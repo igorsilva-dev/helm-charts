@@ -1,0 +1,55 @@
+name: Helm Chart Release Trigger
+
+on:
+  workflow_call:
+    inputs:
+      application:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Manual test version"
+        required: true
+        default: "0.0.0"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+
+      - name: Update Chart.yaml version
+        run: |
+          yq -i '.version = "${{ inputs.version }}"' ${{ inputs.application }}/Chart.yaml
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add ${{ inputs.application }}/Chart.yaml
+          git commit -m "chore: bump ${{ inputs.application }} chart version to ${{ inputs.version }}"
+          git push origin main
+
+      - name: Show version received
+        run: |
+          echo "Version received (changed): ${{ inputs.version }}"
+
+      - name: Show version received
+        run: |
+          echo "Version received (changed): ${{ inputs.version }}"
+
