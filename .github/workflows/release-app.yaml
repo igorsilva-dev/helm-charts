@@ -40,9 +40,8 @@ jobs:
 
       - name: Commit and push changes
         env:
-          GH_PAT: ${{ secrets.GH_PAT }}
+          GH_PAT: ${{ secrets.GH_FLASK_APP }}
         run: |
-          echo ${GH_PAT}
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add charts/${{ inputs.application }}/Chart.yaml
