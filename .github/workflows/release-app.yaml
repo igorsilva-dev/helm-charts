@@ -40,14 +40,14 @@ jobs:
 
       - name: Commit and push changes
         env:
-          GH_PAT: ${{ secrets.GH_FLASK_APP }}
+          GH_PAT: ${{ secrets.GH_HELM }}
         run: |
-          echo "Using GH_PAT: ${{ secrets.GH_FLASK_APP }}"
+          echo "Using GH_PAT: ${{ secrets.GH_HELM }}"
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add charts/${{ inputs.application }}/Chart.yaml
           git commit -m "chore: bump ${{ inputs.application }} chart version to ${{ inputs.version }}"
-          git push https://x-access-token:${{ secrets.GH_FLASK_APP }}@github.com/igorsilva-dev/helm-charts.git main
+          git push https://x-access-token:${{ secrets.GH_HELM }}@github.com/igorsilva-dev/helm-charts.git main
 
       - name: Show version received
         run: |
