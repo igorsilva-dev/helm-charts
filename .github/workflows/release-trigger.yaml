@@ -1,0 +1,10 @@
+on:
+  repository_dispatch:
+    types: [run-helm]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Version received: ${{ github.event.client_payload.version }}"
