@@ -26,6 +26,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
+          repository: igorsilva-dev/helm-charts
           ref: main
 
       - name: Install yq
