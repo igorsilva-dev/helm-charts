@@ -7,6 +7,13 @@ on:
         required: true
         type: string
 
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Manual test version"
+        required: true
+        default: "0.0.0"
+
 jobs:
   run:
     runs-on: ubuntu-latest
