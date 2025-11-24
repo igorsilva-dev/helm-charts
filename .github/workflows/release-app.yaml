@@ -35,7 +35,7 @@ jobs:
 
       - name: Update Chart.yaml version
         run: |
-          yq -i '.version = "${{ inputs.version }}"' ${{ inputs.application }}/Chart.yaml
+          yq -i '.version = "${{ inputs.version }}"' charts/${{ inputs.application }}/Chart.yaml
 
       - name: Commit and push changes
         run: |
