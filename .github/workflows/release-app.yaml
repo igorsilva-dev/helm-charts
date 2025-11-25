@@ -68,10 +68,13 @@ jobs:
           git config user.name "igorsilva-dev"
           git config user.email "dev@igorsilva.dev"
 
-          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/igorsilva-dev/helm-charts.git
+          git remote set-url origin "https://igorsilva-dev:${GH_PAT}@github.com/igorsilva-dev/helm-charts.git"
+
+          git remote -v
 
           git add charts/${{ inputs.application }}/Chart.yaml
           git commit -m "chore: bump ${{ inputs.application }} chart version to ${{ inputs.version }}" || true
+
           git push origin main
 
 
