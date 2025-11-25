@@ -39,6 +39,7 @@ jobs:
           sudo chmod +x /usr/bin/yq
 
       - name: Update Chart.yaml version
+        working-directory: helm-charts
         run: |
           yq -i '.version = "${{ inputs.version }}"' charts/${{ inputs.application }}/Chart.yaml
 
@@ -53,6 +54,7 @@ jobs:
           GH_PAT: ${{ secrets.GH_PAT }}
 
       - name: Commit and push changes
+        working-directory: helm-charts
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |          
