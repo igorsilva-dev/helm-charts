@@ -14,6 +14,20 @@ entries:
   flask-app:
   - apiVersion: v2
     appVersion: 0.2.0
+    created: "2025-11-25T06:46:07.914086809Z"
+    dependencies:
+    - name: app-generic
+      repository: file://../app-generic
+      version: 0.1.0
+    description: A Helm chart for Kubernetes
+    digest: c4406faf710e3a12cd7bed20a6c1fc928e6749f0fa70e604235f0c5197937794
+    name: flask-app
+    type: application
+    urls:
+    - flask-app-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
+    appVersion: 0.2.0
     created: "2025-11-21T07:26:52.620686651Z"
     dependencies:
     - name: app-generic
@@ -26,4 +40,4 @@ entries:
     urls:
     - flask-app-0.1.0.tgz
     version: 0.1.0
-generated: "2025-11-21T07:26:52.620692432Z"
+generated: "2025-11-25T06:46:07.914098791Z"
