@@ -53,6 +53,13 @@ jobs:
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
 
+      - name: Debug repo context
+        working-directory: helm-charts
+        run: |
+          pwd
+          git remote -v
+          ls -la .
+
       - name: Commit and push changes
         working-directory: helm-charts
         env:
