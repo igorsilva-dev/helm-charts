@@ -30,6 +30,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: igorsilva-dev/helm-charts
+          path: helm-charts
           ref: main
 
       - name: Install yq
