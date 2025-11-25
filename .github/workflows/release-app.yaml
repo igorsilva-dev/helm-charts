@@ -65,17 +65,15 @@ jobs:
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |          
-          git config user.name "igorsilva-dev"
+          git config user.name "${GITHUB_ACTOR}"
           git config user.email "dev@igorsilva.dev"
 
-          git remote set-url origin "https://igorsilva-dev:${GH_PAT}@github.com/igorsilva-dev/helm-charts.git"
+          git config --global url."https://${GITHUB_ACTOR}:${GH_PAT}@github.com/".insteadOf "https://github.com/"
 
-          git remote -v
-
-          git add charts/${{ inputs.application }}/Chart.yaml
-          git commit -m "chore: bump ${{ inputs.application }} chart version to ${{ inputs.version }}" || true
-
+          git add charts/flask-app/Chart.yaml
+          git commit -m "chore: bump flask-app chart version to 0.2.0" || true
           git push origin main
+
 
 
       - name: Show version received
