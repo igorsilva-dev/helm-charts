@@ -15,6 +15,9 @@ on:
 
   workflow_dispatch:
     inputs:
+      application:
+        description: "Chart name"
+        required: true
       version:
         description: "Manual test version"
         required: true
@@ -25,13 +28,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout helm-charts repository
+        uses: actions/checkout@v4
         with:
           repository: igorsilva-dev/helm-charts
-          path: helm-charts
           ref: main
+          token: ${{ secrets.GH_PAT }} 
 
       - name: Install yq
         run: |
@@ -39,48 +41,34 @@ jobs:
           sudo chmod +x /usr/bin/yq
 
       - name: Update Chart.yaml version
-        working-directory: helm-charts
         run: |
+          echo "Updating chart version to: ${{ inputs.version }}"
           yq -i '.version = "${{ inputs.version }}"' charts/${{ inputs.application }}/Chart.yaml
 
-      - name: debug GH_PAT
-        run: |
-          if [ -z "$GH_PAT" ]; then
-            echo "GH_PAT is EMPTY"
-          else
-            echo "GH_PAT length is: ${#GH_PAT}"
-          fi
+      - name: Configure Git with PAT
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
-
-      - name: Debug repo context
-        working-directory: helm-charts
         run: |
-          pwd
-          git remote -v
-          ls -la .
-
-      - name: Commit and push changes
-        working-directory: helm-charts
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-        run: |          
           git config user.name "${GITHUB_ACTOR}"
-          git config user.email "dev@igorsilva.dev"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
-          git config --global url."https://${GITHUB_ACTOR}:${GH_PAT}@github.com/".insteadOf "https://github.com/"
+          # Force git to use your PAT for ALL GitHub URLs
+          git config --global credential.helper store
+          echo "https://${GITHUB_ACTOR}:${GH_PAT}@github.com" > ~/.git-credentials
 
-          git add charts/flask-app/Chart.yaml
-          git commit -m "chore: bump flask-app chart version to 0.2.0" || true
+          echo "=== GIT STATUS ==="
+          git status
+
+          echo "=== REMOTES ==="
+          git remote -v
+
+      - name: Commit and Push
+        run: |
+          git add charts/${{ inputs.application }}/Chart.yaml
+          git commit -m "chore: bump ${{ inputs.application }} chart version to ${{ inputs.version }}" || echo "No changes to commit"
+
+          # This push will now use your PAT, not github-actions[bot]
           git push origin main
 
-
-
-      - name: Show version received
-        run: |
-          echo "Version received (changed): ${{ inputs.version }}"
-
-      - name: Show version received
-        run: |
-          echo "Version received (changed): ${{ inputs.version }}"
-
+      - name: Done
+        run: echo "Chart version updated successfully!"
