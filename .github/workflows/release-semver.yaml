@@ -37,11 +37,12 @@ jobs:
           done
           echo "changed=$CHANGED_CHARTS" >> $GITHUB_OUTPUT
 
-      - name: Fail if no charts changed
+      - name: No charts changed — skipping release
         if: steps.detect.outputs.changed == ''
-        run: echo "No chart changes detected. Skipping release." && exit 0
+        run: echo "No chart changes detected. Nothing to release."
 
       - name: Determine new versions
+        if: steps.detect.outputs.changed != ''
         id: semver
         run: |
           mkdir bumped
@@ -65,12 +66,14 @@ jobs:
           done
 
       - name: Upload bumped versions artifact
+        if: steps.detect.outputs.changed != ''
         uses: actions/upload-artifact@v4
         with:
           name: versions
           path: bumped/versions.txt
 
       - name: Package changed charts
+        if: steps.detect.outputs.changed != ''
         run: |
           mkdir -p packaged
           for chart in ${{ steps.detect.outputs.changed }}; do
@@ -78,6 +81,7 @@ jobs:
           done
 
       - name: Push chart packages to GitHub Pages
+        if: steps.detect.outputs.changed != ''
         uses: helm/chart-releaser-action@v1.6.0
         with:
           charts_dir: packaged
@@ -85,6 +89,7 @@ jobs:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create git tags per chart
+        if: steps.detect.outputs.changed != ''
         run: |
           while IFS= read -r line; do
             CHART_PATH=$(echo $line | cut -d= -f1)
