@@ -1,0 +1,99 @@
+name: Release Helm Semver
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.35.2/yq_linux_amd64 \
+            -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+
+      - name: Get changed files
+        id: detect
+        run: |
+          CHANGED_CHARTS=""
+          for chart in charts/*; do
+            if git diff --quiet HEAD~1 -- "$chart"; then
+              echo "No changes in $chart"
+            else
+              echo "Changes detected in $chart"
+              CHANGED_CHARTS+="$chart "
+            fi
+          done
+          echo "changed=$CHANGED_CHARTS" >> $GITHUB_OUTPUT
+
+      - name: Fail if no charts changed
+        if: steps.detect.outputs.changed == ''
+        run: echo "No chart changes detected. Skipping release." && exit 0
+
+      - name: Determine new versions
+        id: semver
+        run: |
+          mkdir bumped
+          for chart in ${{ steps.detect.outputs.changed }}; do
+            CHART_FILE="$chart/Chart.yaml"
+            CURRENT_VERSION=$(yq '.version' "$CHART_FILE")
+
+            # Semantic version bump logic (simple example)
+            if git log -1 --pretty=%B | grep -qi "BREAKING"; then
+              NEW_VERSION=$(semver bump major "$CURRENT_VERSION")
+            elif git log -1 --pretty=%B | grep -qi "feat"; then
+              NEW_VERSION=$(semver bump minor "$CURRENT_VERSION")
+            else
+              NEW_VERSION=$(semver bump patch "$CURRENT_VERSION")
+            fi
+
+            echo "Bumping $chart from $CURRENT_VERSION → $NEW_VERSION"
+            yq -i ".version = \"$NEW_VERSION\"" "$CHART_FILE"
+
+            echo "$chart=$NEW_VERSION" >> bumped/versions.txt
+          done
+
+      - name: Upload bumped versions artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: versions
+          path: bumped/versions.txt
+
+      - name: Package changed charts
+        run: |
+          mkdir -p packaged
+          for chart in ${{ steps.detect.outputs.changed }}; do
+            helm package "$chart" -d packaged/
+          done
+
+      - name: Push chart packages to GitHub Pages
+        uses: helm/chart-releaser-action@v1.6.0
+        with:
+          charts_dir: packaged
+        env:
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create git tags per chart
+        run: |
+          while IFS= read -r line; do
+            CHART_PATH=$(echo $line | cut -d= -f1)
+            VERSION=$(echo $line | cut -d= -f2)
+            CHART_NAME=$(basename "$CHART_PATH")
+
+            TAG="$CHART_NAME-$VERSION"
+            echo "Tagging $TAG"
+
+            git tag "$TAG"
+            git push origin "$TAG"
+          done < bumped/versions.txt
