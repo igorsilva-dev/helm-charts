@@ -65,7 +65,7 @@ jobs:
           done
 
       - name: Upload bumped versions artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: versions
           path: bumped/versions.txt
