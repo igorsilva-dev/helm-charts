@@ -41,6 +41,9 @@ jobs:
         if: steps.detect.outputs.changed == ''
         run: echo "No chart changes detected. Nothing to release."
 
+      - name: Install semver CLI
+        run: npm install -g semver
+      
       - name: Determine new versions
         if: steps.detect.outputs.changed != ''
         id: semver
