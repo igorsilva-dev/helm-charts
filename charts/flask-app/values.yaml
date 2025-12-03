@@ -1,2 +1,3 @@
 test:
   testKey: testValue
+  replicaCount: 2
